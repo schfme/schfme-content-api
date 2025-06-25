@@ -1,0 +1,20 @@
+package me.schf.api.model;
+
+public enum TagEntity {
+	
+	ART,
+	ARTWARE,
+	DEMOSCENE,
+	DESIGN,
+	DEVLOG,
+	GAMES,
+	LOWLEVEL,
+	MATH,
+	MISC,
+	PERFORMANCE,
+	PERSONAL,
+	PROGRAMMING,
+	TUTORIAL,
+	UPDATES
+
+}
