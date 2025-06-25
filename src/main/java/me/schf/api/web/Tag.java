@@ -1,0 +1,20 @@
+package me.schf.api.web;
+
+public enum Tag {
+
+	ART,
+	ARTWARE,
+	DEMOSCENE,
+	DESIGN,
+	DEVLOG,
+	GAMES,
+	LOWLEVEL,
+	MATH,
+	MISC,
+	PERFORMANCE,
+	PERSONAL,
+	PROGRAMMING,
+	TUTORIAL,
+	UPDATES
+	
+}
