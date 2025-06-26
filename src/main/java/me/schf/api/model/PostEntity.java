@@ -12,7 +12,7 @@ public class PostEntity {
 
 	@Id
 	private String id;
-
+	
 	private String title;
 	private String description;
 
@@ -21,7 +21,7 @@ public class PostEntity {
 
 	private String author;
 
-	private boolean sharePost;
+	private Boolean sharePost;
 
 	@Field("markdown_text")
 	private String markdownText;

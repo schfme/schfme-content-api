@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>me.schf</groupId>
 	<artifactId>schfme-content-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>schfme-content-api</name>
 	<description>For managing posts from MongoDB to schf.me</description>
 	<url />

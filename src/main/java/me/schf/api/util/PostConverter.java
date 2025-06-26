@@ -9,8 +9,12 @@ import me.schf.api.web.Post;
 import me.schf.api.web.PostHeadline;
 import me.schf.api.web.Tag;
 
-public class DtoConverter {
-	
+public class PostConverter {
+
+	private PostConverter() {
+		super();
+	}
+
 	public static Post toPost(PostEntity postEntity) {
 		PostHeadline postHeadline = new PostHeadline(
 				postEntity.getTitle(), 
@@ -19,7 +23,7 @@ public class DtoConverter {
 			);
 		
 		List<Tag> tags = postEntity.getTags().stream()
-				.map(DtoConverter::toTag)
+				.map(PostConverter::toTag)
 				.toList();
 		
 		return new Post(
@@ -43,7 +47,7 @@ public class DtoConverter {
 		postEntity.setSharePost(post.sharePost());
 		
 		List<TagEntity> tagEntities = post.tags().stream()
-				.map(DtoConverter::toTagEntity)
+				.map(PostConverter::toTagEntity)
 				.toList();
 		
 		postEntity.setTags(tagEntities);

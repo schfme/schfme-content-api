@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import me.schf.api.model.PostEntity;
 import me.schf.api.model.TagEntity;
-import me.schf.api.util.DtoConverter;
+import me.schf.api.util.PostConverter;
 import me.schf.api.web.Post;
 import me.schf.api.web.PostHeadline;
 import me.schf.api.web.Tag;
@@ -34,7 +34,7 @@ class DtoConverterTests {
         entity.setSharePost(true);
         entity.setTags(List.of(TagEntity.ART, TagEntity.DEMOSCENE));
 
-        Post post = DtoConverter.toPost(entity);
+        Post post = PostConverter.toPost(entity);
 
         assertEquals("Sample Title", post.postHeadline().title());
         assertEquals("Sample blurb", post.postHeadline().blurb());
@@ -52,7 +52,7 @@ class DtoConverterTests {
         PostHeadline headline = new PostHeadline("Another Title", date, "Another blurb");
         Post post = new Post(headline, "John Doe", "_markdown_", List.of(Tag.ART), false);
 
-        PostEntity entity = DtoConverter.toPostEntity(post);
+        PostEntity entity = PostConverter.toPostEntity(post);
 
         assertEquals("Another Title", entity.getTitle());
         assertEquals("Another blurb", entity.getDescription());
@@ -65,13 +65,13 @@ class DtoConverterTests {
 
 	@Test
 	void test_toTagEntity() {
-		Stream.of(Tag.values()).map(DtoConverter::toTagEntity)
+		Stream.of(Tag.values()).map(PostConverter::toTagEntity)
 				.forEach(te -> assertNotNull(te, "Bad tag to tag entity mapping."));
 	}
 
 	@Test
 	void test_toTag() {
-		Stream.of(TagEntity.values()).map(DtoConverter::toTag)
+		Stream.of(TagEntity.values()).map(PostConverter::toTag)
 				.forEach(te -> assertNotNull(te, "Bad tag entity to tag mapping."));
 	}
 

@@ -1,7 +1,8 @@
 spring:
   application:
-    name: schfme-content-api
-
+    name: schfme-content-api 
+server:
+  port: ${PORT:5000}
 app:
   environment: test
   parameter-names:
@@ -17,7 +18,6 @@ spring:
     activate:
       on-profile: test
 ---
-
 spring:
   config:
     activate:
