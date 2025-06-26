@@ -1,3 +1,26 @@
 spring:
   application:
     name: schfme-content-api
+
+app:
+  environment: test
+  parameter-names:
+    cluster-name: "/schfme/${app.environment}/database/connection/cluster-name"
+    host: "/schfme/${app.environment}/database/connection/host"
+    database-name: "/schfme/${app.environment}/database/name"
+    service-name: "/schfme/${app.environment}/database/service/name"
+    service-password: "/schfme/${app.environment}/database/service/password"
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+app:
+  environment: prod
