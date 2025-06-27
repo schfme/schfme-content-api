@@ -89,11 +89,6 @@ public class PostController {
 	}
 
 	@Operation(summary = "Search posts with filters",
-		    requestBody = @RequestBody(
-		        description = "Post probe to filter on",
-		        required = false,
-		        content = @Content(schema = @Schema(implementation = Post.class))
-		    ),
 		    parameters = {
 		        @Parameter(
 		            name = "from",
@@ -131,12 +126,12 @@ public class PostController {
 		            schema = @Schema(type = "boolean")
 		        ),
 		        @Parameter(
-			         name = "tags",
-			         description = "Filter posts by tags",
-			         in = ParameterIn.QUERY,
-			         required = false,
-			         schema = @Schema(type = "tag")
-			    )
+		        	name = "tags",
+		        	description = "Filter posts by tags",
+		        	in = ParameterIn.QUERY,
+		        	required = false,
+		        	array = @ArraySchema(schema = @Schema(implementation = me.schf.api.web.Tag.class))
+		        )
 		    },
 		    responses = {
 		        @ApiResponse(responseCode = "200", description = "List of matching posts",
