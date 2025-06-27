@@ -2,6 +2,7 @@ package me.schf.api.util;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import me.schf.api.model.PostEntity;
 import me.schf.api.model.TagEntity;
@@ -22,9 +23,11 @@ public class PostConverter {
 				postEntity.getDescription()
 			);
 		
-		List<Tag> tags = postEntity.getTags().stream()
-				.map(PostConverter::toTag)
-				.toList();
+		List<Tag> tags = Optional.ofNullable(postEntity.getTags())
+				.orElseGet(List::of)
+		        .stream()
+		        .map(PostConverter::toTag)
+		        .toList();
 		
 		return new Post(
 				postHeadline, 
@@ -44,11 +47,13 @@ public class PostConverter {
 		}
 		postEntity.setAuthor(post.author());
 		postEntity.setMarkdownText(post.markdownText());
-		postEntity.setSharePost(post.sharePost());
+		postEntity.setSharePost(Boolean.TRUE.equals(post.sharePost()));
 		
-		List<TagEntity> tagEntities = post.tags().stream()
-				.map(PostConverter::toTagEntity)
-				.toList();
+		List<TagEntity> tagEntities = Optional.ofNullable(post.tags())
+		        .orElseGet(List::of)
+		        .stream()
+		        .map(PostConverter::toTagEntity)
+		        .toList();
 		
 		postEntity.setTags(tagEntities);
 		

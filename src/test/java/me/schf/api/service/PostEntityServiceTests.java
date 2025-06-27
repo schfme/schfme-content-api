@@ -95,12 +95,11 @@ class PostEntityServiceTests {
 
         ZonedDateTime from = ZonedDateTime.now().minusDays(1);
         ZonedDateTime to = ZonedDateTime.now();
-        List<String> tags = List.of("tech");
                 
         when(mongoTemplate.find(any(Query.class), eq(PostEntity.class)))
                 .thenReturn(List.of(new PostEntity()));
 
-        List<PostEntity> result = postEntityService.search(probe, from, to, tags);
+        List<PostEntity> result = postEntityService.search(probe, from, to);
 
         assertNotNull(result);
         verify(mongoTemplate).find(argThat(query -> {
@@ -118,7 +117,7 @@ class PostEntityServiceTests {
         when(mongoTemplate.find(any(Query.class), eq(PostEntity.class)))
                 .thenReturn(Collections.emptyList());
 
-        assertDoesNotThrow(() -> postEntityService.search(probe, null, null, null));
+        assertDoesNotThrow(() -> postEntityService.search(probe, null, null));
 
         verify(mongoTemplate).find(any(Query.class), eq(PostEntity.class));
     }
@@ -132,7 +131,7 @@ class PostEntityServiceTests {
 
         when(mongoTemplate.find(any(Query.class), eq(PostEntity.class))).thenReturn(expected);
 
-        List<PostEntity> result = postEntityService.search(probe, null, null, null);
+        List<PostEntity> result = postEntityService.search(probe, null, null);
 
         assertEquals(expected, result);
         verify(mongoTemplate).find(Mockito.<Query>argThat(query -> {

@@ -79,7 +79,7 @@ class PostHeadlineControllerTests {
     void test_getPostHeadlineById_blankId_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/posts/headlines/ ").with(apiKeyHeader()))
             .andExpect(status().isBadRequest())
-            .andExpect(status().reason("Id must not be blank"));
+            .andExpect(status().reason("Id must not be null or blank"));
     }
 
     @Test

@@ -3,6 +3,9 @@ spring:
     name: schfme-content-api 
 server:
   port: ${PORT:5000}
+logging:
+  level:
+    root: ERROR
 app:
   environment: test
   parameter-names:

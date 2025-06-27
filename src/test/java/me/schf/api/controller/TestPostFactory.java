@@ -25,8 +25,13 @@ public class TestPostFactory {
 	}
 
 	public static Post dummyPost() {
-		return new Post(dummyPostHeadline(), "steve minecraft", "dummy **markdown** text for testing.",
-				List.of(Tag.ART, Tag.ARTWARE), false);
+		return new Post(
+				dummyPostHeadline(), 
+				"steve minecraft", 
+				"dummy **markdown** text for testing.",
+				List.of(Tag.ART, Tag.ARTWARE),
+				Boolean.FALSE
+			);
 	}
 	
 	public static PostEntity dummyPostEntity() {
@@ -35,7 +40,7 @@ public class TestPostFactory {
 		postEntity.setDescription("dummy blurb.");
 		postEntity.setMarkdownText("dummy **markdown** text for testing.");
 		postEntity.setPublicationDate(dummyZdt());
-		postEntity.setSharePost(false);
+		postEntity.setSharePost(Boolean.FALSE);
 		postEntity.setTags(List.of(TagEntity.ART, TagEntity.ARTWARE));
 		postEntity.setTitle("dummy title");
 		return postEntity;

@@ -129,7 +129,6 @@ class PostControllerTests {
     }
 
 	
-    @SuppressWarnings("unchecked")
 	@Test
     void test_searchPosts_shouldReturnMatchingPosts() throws Exception {
         PostEntity probeEntity = dummyPostEntity();
@@ -137,8 +136,7 @@ class PostControllerTests {
         when(postEntityService.search(
                 any(PostEntity.class),
                 any(ZonedDateTime.class),
-                any(ZonedDateTime.class),
-                any(List.class)
+                any(ZonedDateTime.class)
         )).thenReturn(List.of(probeEntity));
 
         String jsonProbe = objectMapper.writeValueAsString(dummyPost());
@@ -148,8 +146,7 @@ class PostControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonProbe)
                 .param("from", "2023-01-01T00:00:00Z")
-                .param("to", "2023-12-31T23:59:59Z")
-                .param("tags", "tag1,tag2"))
+                .param("to", "2023-12-31T23:59:59Z"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$[0].postHeadline.title").value("dummy title"))
