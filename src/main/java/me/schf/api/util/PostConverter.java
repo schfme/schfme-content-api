@@ -34,7 +34,7 @@ public class PostConverter {
 				postEntity.getAuthor(), 
 				postEntity.getMarkdownText(), 
 				tags, 
-				postEntity.isSharePost()
+				Boolean.TRUE.equals(postEntity.isSharePost())
 			);
 	}
 	

@@ -88,43 +88,73 @@ public class PostController {
 				.toList();
 	}
 
-    @Operation(summary = "Search posts with filters",
-		requestBody = @RequestBody(
-			description = "Post probe to filter on",
-			required = true,
-			content = @Content(schema = @Schema(implementation = Post.class))
-		),
-		parameters = {
-			@Parameter(
-				name = "from",
-				description = "Filter posts from this date/time (ISO-8601 format)",
-				in = ParameterIn.QUERY,
-				required = false,
-				schema = @Schema(type = "string", format = "date-time")
-			),
-			@Parameter(
-				name = "to",
-				description = "Filter posts up to this date/time (ISO-8601 format)",
-				in = ParameterIn.QUERY,
-				required = false,
-				schema = @Schema(type = "string", format = "date-time")
-			)
-		},
-		responses = {
-			@ApiResponse(responseCode = "200", description = "List of matching posts",
-				content = @Content(array = @ArraySchema(schema = @Schema(implementation = Post.class))))
-		})
-    @PostMapping("/search")
-    public List<Post> searchPosts(
-			@RequestBody Post probe,
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime from,
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime to) {
-        PostEntity probeEntity = toPostEntity(probe);
-        return postEntityService.search(probeEntity, from, to)
-                .stream()
-                .map(PostConverter::toPost)
-                .toList();
-    }
+	@Operation(summary = "Search posts with filters",
+		    requestBody = @RequestBody(
+		        description = "Post probe to filter on",
+		        required = false,
+		        content = @Content(schema = @Schema(implementation = PostEntity.class))
+		    ),
+		    parameters = {
+		        @Parameter(
+		            name = "from",
+		            description = "Filter posts from this date/time (ISO-8601 format)",
+		            in = ParameterIn.QUERY,
+		            required = false,
+		            schema = @Schema(type = "string", format = "date-time")
+		        ),
+		        @Parameter(
+		            name = "to",
+		            description = "Filter posts up to this date/time (ISO-8601 format)",
+		            in = ParameterIn.QUERY,
+		            required = false,
+		            schema = @Schema(type = "string", format = "date-time")
+		        ),
+		        @Parameter(
+		            name = "title",
+		            description = "Filter posts by title",
+		            in = ParameterIn.QUERY,
+		            required = false,
+		            schema = @Schema(type = "string")
+		        ),
+		        @Parameter(
+		            name = "author",
+		            description = "Filter posts by author",
+		            in = ParameterIn.QUERY,
+		            required = false,
+		            schema = @Schema(type = "string")
+		        ),
+		        @Parameter(
+		            name = "sharePost",
+		            description = "Filter posts by sharePost flag",
+		            in = ParameterIn.QUERY,
+		            required = false,
+		            schema = @Schema(type = "boolean")
+		        )
+		    },
+		    responses = {
+		        @ApiResponse(responseCode = "200", description = "List of matching posts",
+		            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostEntity.class))))
+		    })
+		@GetMapping
+		public List<Post> getPosts(
+		    @RequestParam(required = false) String title,
+		    @RequestParam(required = false) String author,
+		    @RequestParam(required = false) Boolean sharePost,
+		    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime from,
+		    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime to
+		) {
+		    PostEntity probeEntity = new PostEntity();
+		    probeEntity.setTitle(title);
+		    probeEntity.setAuthor(author);
+		    if (sharePost != null) {
+		        probeEntity.setSharePost(sharePost);
+		    }
+		    return postEntityService.search(probeEntity, from, to)
+		        .stream()
+		        .map(PostConverter::toPost)
+		        .toList();
+		}
+
 
     @Operation(summary = "Delete a post by ID",
 		parameters = {
@@ -183,5 +213,5 @@ public class PostController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
+    
 }

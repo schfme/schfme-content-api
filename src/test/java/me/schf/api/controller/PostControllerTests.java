@@ -129,8 +129,8 @@ class PostControllerTests {
     }
 
 	
-	@Test
-    void test_searchPosts_shouldReturnMatchingPosts() throws Exception {
+    @Test
+    void test_getPosts_shouldReturnMatchingPosts() throws Exception {
         PostEntity probeEntity = dummyPostEntity();
 
         when(postEntityService.search(
@@ -139,12 +139,11 @@ class PostControllerTests {
                 any(ZonedDateTime.class)
         )).thenReturn(List.of(probeEntity));
 
-        String jsonProbe = objectMapper.writeValueAsString(dummyPost());
-
-        mockMvc.perform(post("/posts/search")
-        		.with(apiKeyHeader())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonProbe)
+        mockMvc.perform(get("/posts")
+                .with(apiKeyHeader())
+                .param("title", "dummy title")
+                .param("author", "dummy author")
+                .param("sharePost", "true")
                 .param("from", "2023-01-01T00:00:00Z")
                 .param("to", "2023-12-31T23:59:59Z"))
             .andExpect(status().isOk())
@@ -211,6 +210,33 @@ class PostControllerTests {
 	
 	@Test
     void test_getPostById_notFound_shouldReturnNotFound() throws Exception {
+        when(postEntityService.findById("missing")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/posts/missing").with(apiKeyHeader()))
+            .andExpect(status().isNotFound());
+    }
+	
+    @Test
+    void test_getPostByTitle_valid_shouldReturnPost() throws Exception {
+        when(postEntityService.findById("123")).thenReturn(Optional.of(dummyPostEntity()));
+
+        mockMvc.perform(get("/posts/123").with(apiKeyHeader()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.postHeadline.title").value("dummy title"))
+            .andExpect(jsonPath("$.postHeadline.publicationDate").value("2025-06-25T22:39:22.849193-05:00"))
+            .andExpect(jsonPath("$.postHeadline.blurb").value("dummy blurb."));
+    }
+	
+    @Test
+    void test_getPostByTitle_blankId_shouldReturnBadRequest() throws Exception {
+        mockMvc.perform(get("/posts/ ").with(apiKeyHeader()))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Id must not be blank"));
+    }
+	
+	@Test
+    void test_getPostByTitle_notFound_shouldReturnNotFound() throws Exception {
         when(postEntityService.findById("missing")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/posts/missing").with(apiKeyHeader()))

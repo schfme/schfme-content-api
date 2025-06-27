@@ -1,6 +1,7 @@
 package me.schf.api.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,5 +12,7 @@ import me.schf.api.model.PostEntity;
 public interface PostEntityRepository extends MongoRepository<PostEntity, String>, QueryByExampleExecutor<PostEntity> {
 
 	List<PostEntity> findAllByOrderByPublicationDateDesc(Pageable pageable);
+	Optional<PostEntity> findByTitle(String title);
+
 
 }

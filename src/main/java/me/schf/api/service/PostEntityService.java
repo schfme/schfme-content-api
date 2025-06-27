@@ -73,4 +73,8 @@ public class PostEntityService {
 	public Optional<PostEntity> findById(String id) {
 		return postEntityRepository.findById(id);
 	}
+	
+	public Optional<PostEntity> findByTitle(String id) {
+		return postEntityRepository.findByTitle(id);
+	}
 }
