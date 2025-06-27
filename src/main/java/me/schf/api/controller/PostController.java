@@ -92,7 +92,7 @@ public class PostController {
 		    requestBody = @RequestBody(
 		        description = "Post probe to filter on",
 		        required = false,
-		        content = @Content(schema = @Schema(implementation = PostEntity.class))
+		        content = @Content(schema = @Schema(implementation = Post.class))
 		    ),
 		    parameters = {
 		        @Parameter(
@@ -133,7 +133,7 @@ public class PostController {
 		    },
 		    responses = {
 		        @ApiResponse(responseCode = "200", description = "List of matching posts",
-		            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PostEntity.class))))
+		            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Post.class))))
 		    })
 		@GetMapping
 		public List<Post> getPosts(
@@ -154,7 +154,6 @@ public class PostController {
 		        .map(PostConverter::toPost)
 		        .toList();
 		}
-
 
     @Operation(summary = "Delete a post by ID",
 		parameters = {
