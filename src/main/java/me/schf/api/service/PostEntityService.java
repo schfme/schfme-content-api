@@ -35,8 +35,7 @@ public class PostEntityService {
 		return postEntityRepository.findAllByOrderByPublicationDateDesc(pageable);
 	}
 
-	public List<PostEntity> search(PostEntity probe, ZonedDateTime fromDate, ZonedDateTime toDate,
-			List<String> tagNames) {
+	public List<PostEntity> search(PostEntity probe, ZonedDateTime fromDate, ZonedDateTime toDate) {
 		Query query = new Query();
 
 		if (probe.getAuthor() != null) {
@@ -60,10 +59,6 @@ public class PostEntityService {
 			query.addCriteria(dateCriteria);
 		}
 
-		if (tagNames != null && !tagNames.isEmpty()) {
-			query.addCriteria(Criteria.where("tags.name").in(tagNames));
-		}
-
 		return mongoTemplate.find(query, PostEntity.class);
 	}
 
@@ -77,5 +72,9 @@ public class PostEntityService {
 
 	public Optional<PostEntity> findById(String id) {
 		return postEntityRepository.findById(id);
+	}
+	
+	public Optional<PostEntity> findByTitle(String id) {
+		return postEntityRepository.findByTitle(id);
 	}
 }
