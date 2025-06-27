@@ -129,7 +129,14 @@ public class PostController {
 		            in = ParameterIn.QUERY,
 		            required = false,
 		            schema = @Schema(type = "boolean")
-		        )
+		        ),
+		        @Parameter(
+			         name = "tags",
+			         description = "Filter posts by tags",
+			         in = ParameterIn.QUERY,
+			         required = false,
+			         schema = @Schema(type = "tag")
+			    )
 		    },
 		    responses = {
 		        @ApiResponse(responseCode = "200", description = "List of matching posts",
@@ -141,11 +148,15 @@ public class PostController {
 		    @RequestParam(required = false) String author,
 		    @RequestParam(required = false) Boolean sharePost,
 		    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime from,
-		    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime to
+		    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime to,
+		    @RequestParam(required = false) List<me.schf.api.web.Tag> tags
 		) {
 		    PostEntity probeEntity = new PostEntity();
 		    probeEntity.setTitle(title);
 		    probeEntity.setAuthor(author);
+		    if (tags != null) {
+		    	probeEntity.setTags(tags.stream().map(PostConverter::toTagEntity).toList());
+		    }
 		    if (sharePost != null) {
 		        probeEntity.setSharePost(sharePost);
 		    }
