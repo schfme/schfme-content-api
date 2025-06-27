@@ -21,17 +21,22 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import me.schf.api.TestConfig;
+import me.schf.api.config.app.ParameterNamesConfig;
 import me.schf.api.model.PostEntity;
 import me.schf.api.service.PostEntityService;
 
+@Import({TestConfig.class, ParameterNamesConfig.class})
 @WebMvcTest(PostController.class)
 class PostControllerTests {
 	
@@ -41,6 +46,13 @@ class PostControllerTests {
     @MockitoBean
     private PostEntityService postEntityService;
     
+    private RequestPostProcessor apiKeyHeader() {
+        return request -> {
+            request.addHeader("X-API-Key", "dummy-api-key");
+            return request;
+        };
+    }
+    
 	private final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule())
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -48,6 +60,7 @@ class PostControllerTests {
     @Test
     void test_getRecentPosts_limitTooLow_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/posts/recent")
+                .with(apiKeyHeader())
                 .param("limit", "0"))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Limit must be between 1 and 100"));
@@ -56,6 +69,7 @@ class PostControllerTests {
     @Test
     void test_getRecentPosts_limitTooHigh_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/posts/recent")
+                .with(apiKeyHeader())
                 .param("limit", "101"))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Limit must be between 1 and 100"));
@@ -67,8 +81,9 @@ class PostControllerTests {
         when(postEntityService.getRecentPosts(10))
             .thenReturn(List.of(dummyPostEntity()));
 
-        mockMvc.perform(get("/posts/recent"))
-        .andExpect(status().isOk())
+		mockMvc.perform(get("/posts/recent")
+				.with(apiKeyHeader()))
+		        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].markdownText").value(dummyPostEntity.getMarkdownText()))
@@ -78,6 +93,7 @@ class PostControllerTests {
 	@Test
     void test_createOrUpdatePost_blank_shouldReturnBadRequest() throws Exception {
 	    mockMvc.perform(post("/posts")
+	    		.with(apiKeyHeader())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(""))  // blank
 	    .andExpect(status().isBadRequest());    }
@@ -85,6 +101,7 @@ class PostControllerTests {
 	@Test
     void test_createOrUpdatePost_emptyJson_shouldReturnBadRequest() throws Exception {
 		mockMvc.perform(post("/posts")
+				.with(apiKeyHeader())
 		        .contentType(MediaType.APPLICATION_JSON)
 		        .content("{}"))  // empty json
 		    .andExpect(status().isBadRequest())
@@ -100,6 +117,7 @@ class PostControllerTests {
         when(postEntityService.add(any(PostEntity.class))).thenReturn(dummyPostEntity());
 
         mockMvc.perform(post("/posts")
+        		.with(apiKeyHeader())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dummyPost())))
             .andExpect(status().isOk())
@@ -126,6 +144,7 @@ class PostControllerTests {
         String jsonProbe = objectMapper.writeValueAsString(dummyPost());
 
         mockMvc.perform(post("/posts/search")
+        		.with(apiKeyHeader())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonProbe)
                 .param("from", "2023-01-01T00:00:00Z")
@@ -143,67 +162,68 @@ class PostControllerTests {
         when(postEntityService.findById("123")).thenReturn(Optional.of(dummyPostEntity()));
         doNothing().when(postEntityService).delete(any(PostEntity.class));
 
-        mockMvc.perform(delete("/posts/123"))
+        mockMvc.perform(delete("/posts/123")
+        		.with(apiKeyHeader()))
             .andExpect(status().isNoContent());
 
         verify(postEntityService, times(1)).delete(any(PostEntity.class));
     }
 
 	
-    @Test
-    void test_deletePost_invalidId_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(delete("/posts/")) // empty id in path (won't match mapping) 
-            .andExpect(status().isNotFound()); 
+	@Test
+	void test_deletePost_invalidId_shouldReturnBadRequest() throws Exception {
+		mockMvc.perform(delete("/posts/")
+				.with(apiKeyHeader())) // empty id in path (won't match mapping)
+				.andExpect(status().isNotFound());
 
-        mockMvc.perform(delete("/posts/ "))
-            .andExpect(status().isBadRequest())
-            .andExpect(status().reason("Id must not be blank"));
+		mockMvc.perform(delete("/posts/ ")
+				.with(apiKeyHeader())).andExpect(status().isBadRequest())
+				.andExpect(status().reason("Id must not be blank"));
 
-        mockMvc.perform(delete("/posts/null"))
-            .andExpect(status().isNotFound());
-    }
+		mockMvc.perform(delete("/posts/null")
+				.with(apiKeyHeader())).andExpect(status().isNotFound());
+	}
 
 	
-    @Test
+	@Test
     void test_deletePost_notFound_shouldReturnNotFound() throws Exception {
         when(postEntityService.findById("notfound")).thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/posts/notfound"))
+        mockMvc.perform(delete("/posts/notfound").with(apiKeyHeader()))
             .andExpect(status().isNotFound());
     }
-
 	
     @Test
     void test_getPostById_valid_shouldReturnPost() throws Exception {
         when(postEntityService.findById("123")).thenReturn(Optional.of(dummyPostEntity()));
 
-        mockMvc.perform(get("/posts/123"))
+        mockMvc.perform(get("/posts/123").with(apiKeyHeader()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.postHeadline.title").value("dummy title"))
             .andExpect(jsonPath("$.postHeadline.publicationDate").value("2025-06-25T22:39:22.849193-05:00"))
             .andExpect(jsonPath("$.postHeadline.blurb").value("dummy blurb."));
     }
-
 	
     @Test
     void test_getPostById_blankId_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/posts/ "))
+        mockMvc.perform(get("/posts/ ").with(apiKeyHeader()))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Id must not be blank"));
     }
 	
-    @Test
+	@Test
     void test_getPostById_notFound_shouldReturnNotFound() throws Exception {
         when(postEntityService.findById("missing")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/posts/missing"))
+        mockMvc.perform(get("/posts/missing").with(apiKeyHeader()))
             .andExpect(status().isNotFound());
     }
-
 	
-	
-	
-	
+	@Test
+	void test_anyCall_noApiKey_shouldReturnNotAuthorized() throws Exception {
+	    mockMvc.perform(get("/posts/123"))  // no api key header here
+	        .andExpect(status().isUnauthorized());
+	}
 
 }

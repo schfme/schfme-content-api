@@ -25,6 +25,7 @@ class ParameterNameConfigTests {
         assertEquals("/schfme/test/database/name", config.getDatabaseName());
         assertEquals("/schfme/test/database/service/name", config.getServiceName());
         assertEquals("/schfme/test/database/service/password", config.getServicePassword());
+        assertEquals("/schfme-content-api/test/api-keys/", config.getApiKeysPath());
     }
 
 }

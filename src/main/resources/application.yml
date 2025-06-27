@@ -6,6 +6,7 @@ server:
 app:
   environment: test
   parameter-names:
+    api-keys-path: "/${spring.application.name}/${app.environment}/api-keys/"
     cluster-name: "/schfme/${app.environment}/database/connection/cluster-name"
     host: "/schfme/${app.environment}/database/connection/host"
     database-name: "/schfme/${app.environment}/database/name"

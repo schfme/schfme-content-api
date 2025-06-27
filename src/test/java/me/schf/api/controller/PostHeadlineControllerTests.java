@@ -15,13 +15,18 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import me.schf.api.TestConfig;
+import me.schf.api.config.app.ParameterNamesConfig;
 import me.schf.api.model.PostEntity;
 import me.schf.api.service.PostEntityService;
 
+@Import({TestConfig.class, ParameterNamesConfig.class})
 @WebMvcTest(PostHeadlineController.class)
 class PostHeadlineControllerTests {
 	
@@ -30,10 +35,18 @@ class PostHeadlineControllerTests {
 
     @MockitoBean
     private PostEntityService postEntityService;
+    
+    private RequestPostProcessor apiKeyHeader() {
+        return request -> {
+            request.addHeader("X-API-Key", "dummy-api-key");
+            return request;
+        };
+    }
 
     @Test
     void test_getRecentPostHeadlines_limitTooLow_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/posts/headlines/recent")
+        		.with(apiKeyHeader())
                 .param("limit", "0"))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Limit must be between 1 and 100"));
@@ -42,6 +55,7 @@ class PostHeadlineControllerTests {
     @Test
     void test_getRecentPostHeadlines_limitTooHigh_shouldReturnBadRequest() throws Exception {
         mockMvc.perform(get("/posts/headlines/recent")
+        		.with(apiKeyHeader())
                 .param("limit", "101"))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Limit must be between 1 and 100"));
@@ -52,8 +66,8 @@ class PostHeadlineControllerTests {
         PostEntity dummy = dummyPostEntity();
         when(postEntityService.getRecentPosts(anyInt())).thenReturn(List.of(dummy));
 
-        mockMvc.perform(get("/posts/headlines/recent"))
-            .andExpect(status().isOk())
+		mockMvc.perform(get("/posts/headlines/recent").with(apiKeyHeader()))
+	            .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0].title").value("dummy title"))
@@ -63,7 +77,7 @@ class PostHeadlineControllerTests {
 
     @Test
     void test_getPostHeadlineById_blankId_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/posts/headlines/ "))
+        mockMvc.perform(get("/posts/headlines/ ").with(apiKeyHeader()))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Id must not be blank"));
     }
@@ -73,7 +87,7 @@ class PostHeadlineControllerTests {
         PostEntity dummy = dummyPostEntity();
         when(postEntityService.findById(anyString())).thenReturn(Optional.of(dummy));
 
-        mockMvc.perform(get("/posts/headlines/123"))
+        mockMvc.perform(get("/posts/headlines/123").with(apiKeyHeader()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.title").value("dummy title"))
@@ -85,9 +99,14 @@ class PostHeadlineControllerTests {
     void test_getPostHeadlineById_notFound_shouldReturnNotFound() throws Exception {
         when(postEntityService.findById(anyString())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/posts/headlines/missing"))
+        mockMvc.perform(get("/posts/headlines/missing").with(apiKeyHeader()))
             .andExpect(status().isNotFound());
     }
-
+    
+	@Test
+	void test_anyCall_noApiKey_shouldReturnNotAuthorized() throws Exception {
+	    mockMvc.perform(get("/posts/headlines/123"))  // no api key header here
+	        .andExpect(status().isUnauthorized());
+	}
 
 }
