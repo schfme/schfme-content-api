@@ -68,11 +68,11 @@ public class PostEntity {
 		this.author = author;
 	}
 
-	public boolean isSharePost() {
+	public Boolean isSharePost() {
 		return sharePost;
 	}
 
-	public void setSharePost(boolean sharePost) {
+	public void setSharePost(Boolean sharePost) {
 		this.sharePost = sharePost;
 	}
 

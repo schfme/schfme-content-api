@@ -153,6 +153,67 @@ class PostControllerTests {
             .andExpect(jsonPath("$[0].postHeadline.publicationDate").value("2025-06-25T22:39:22.849193-05:00"))
             .andExpect(jsonPath("$[0].postHeadline.blurb").value("dummy blurb."));
     }
+    
+    void test_getPosts_tagMismatch_1_shouldNotReturnMatchingPosts() throws Exception {
+        when(postEntityService.search(
+                any(PostEntity.class),
+                any(ZonedDateTime.class),
+                any(ZonedDateTime.class)
+        )).thenReturn(List.of()); // Simulate no matching posts
+
+        mockMvc.perform(get("/posts")
+                .with(apiKeyHeader())
+                .param("title", "dummy title")
+                .param("author", "dummy author")
+                .param("sharePost", "true")
+                .param("from", "2023-01-01T00:00:00Z")
+                .param("to", "2023-12-31T23:59:59Z")
+                .param("tags", "MISC"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    
+    void test_getPosts_tagMismatch_2_shouldNotReturnMatchingPosts() throws Exception {
+        when(postEntityService.search(
+                any(PostEntity.class),
+                any(ZonedDateTime.class),
+                any(ZonedDateTime.class)
+        )).thenReturn(List.of());
+
+        mockMvc.perform(get("/posts")
+                .with(apiKeyHeader())
+                .param("title", "dummy title")
+                .param("author", "dummy author")
+                .param("sharePost", "true")
+                .param("from", "2023-01-01T00:00:00Z")
+                .param("to", "2023-12-31T23:59:59Z")
+                .param("tags", "ART, MISC"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()").value(0));
+    }
+    
+    void test_getPosts_tagMismatch_3__shouldNotReturnMatchingPosts() throws Exception {
+        when(postEntityService.search(
+                any(PostEntity.class),
+                any(ZonedDateTime.class),
+                any(ZonedDateTime.class)
+        )).thenReturn(List.of());
+
+        mockMvc.perform(get("/posts")
+                .with(apiKeyHeader())
+                .param("title", "dummy title")
+                .param("author", "dummy author")
+                .param("sharePost", "true")
+                .param("from", "2023-01-01T00:00:00Z")
+                .param("to", "2023-12-31T23:59:59Z")
+                .param("tags", "ART, ARTWARE, MISC"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()").value(0));
+    }
 	
     @Test
     void test_deletePost_validId_shouldReturnNoContent() throws Exception {

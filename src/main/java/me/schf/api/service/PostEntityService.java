@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import me.schf.api.model.PostEntity;
+import me.schf.api.model.TagEntity;
 import me.schf.api.repository.PostEntityRepository;
 
 @Service
@@ -36,31 +37,44 @@ public class PostEntityService {
 	}
 
 	public List<PostEntity> search(PostEntity probe, ZonedDateTime fromDate, ZonedDateTime toDate) {
-		Query query = new Query();
+	    Query query = new Query();
 
-		if (probe.getAuthor() != null) {
-			query.addCriteria(Criteria.where("author").is(probe.getAuthor()));
-		}
+	    if (probe.getAuthor() != null) {
+	        query.addCriteria(Criteria.where("author").is(probe.getAuthor()));
+	    }
 
-		if (probe.getTitle() != null) {
-			String escapedInput = Pattern.quote(probe.getTitle());
-			query.addCriteria(Criteria.where("title").regex(escapedInput, "i"));
-		}
+	    if (probe.getTitle() != null) {
+	        String escapedInput = Pattern.quote(probe.getTitle());
+	        query.addCriteria(Criteria.where("title").regex(escapedInput, "i"));
+	    }
 
-		if (fromDate != null || toDate != null) {
-			Criteria dateCriteria = Criteria.where("publication_date");
-			if (fromDate != null && toDate != null) {
-				dateCriteria.gte(fromDate).lte(toDate);
-			} else if (fromDate != null) {
-				dateCriteria.gte(fromDate);
-			} else {
-				dateCriteria.lte(toDate);
-			}
-			query.addCriteria(dateCriteria);
-		}
+	    if (probe.isSharePost() != null) {
+	        query.addCriteria(Criteria.where("sharePost").is(probe.isSharePost()));
+	    }
 
-		return mongoTemplate.find(query, PostEntity.class);
+	    if (probe.getTags() != null && !probe.getTags().isEmpty()) {
+	        List<String> tagStrings = probe.getTags().stream()
+	            .map(TagEntity::name)
+	            .toList();
+
+	        query.addCriteria(Criteria.where("tags").in(tagStrings));
+	    }
+
+	    if (fromDate != null || toDate != null) {
+	        Criteria dateCriteria = Criteria.where("publication_date");
+	        if (fromDate != null && toDate != null) {
+	            dateCriteria.gte(fromDate).lte(toDate);
+	        } else if (fromDate != null) {
+	            dateCriteria.gte(fromDate);
+	        } else {
+	            dateCriteria.lte(toDate);
+	        }
+	        query.addCriteria(dateCriteria);
+	    }
+	    System.out.println(query);
+	    return mongoTemplate.find(query, PostEntity.class);
 	}
+
 
 	public void delete(PostEntity postEntity) {
 		if (postEntity.getId() != null) {
