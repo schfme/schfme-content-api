@@ -18,7 +18,8 @@ import me.schf.api.config.aws.AwsConfig.ParameterRetriever;
 public class ApiKeyFilter extends OncePerRequestFilter {
 
 	private final Set<String> validApiKeys;
-
+	private static final Set<String> SKIP_PATHS = Set.of("/health", "/actuator/health");
+	
 	public ApiKeyFilter(ParameterRetriever awsParameterRetriever, ParameterNamesConfig parameterNamesConfig) {
 		validApiKeys = new HashSet<>(
 				awsParameterRetriever.getParametersByPath(parameterNamesConfig.getApiKeysPath(), true).values());
@@ -29,6 +30,12 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		String requestApiKey = request.getHeader("X-API-KEY");
+	    String path = request.getRequestURI();
+		
+	    if (SKIP_PATHS.contains(path)) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
 
 		if (validApiKeys.contains(requestApiKey)) {
 			filterChain.doFilter(request, response);
