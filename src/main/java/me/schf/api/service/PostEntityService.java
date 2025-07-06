@@ -71,7 +71,6 @@ public class PostEntityService {
 	        }
 	        query.addCriteria(dateCriteria);
 	    }
-	    System.out.println(query);
 	    return mongoTemplate.find(query, PostEntity.class);
 	}
 
